@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { phuketVenues } from './venues';
+import { supabase } from '../lib/supabase.js'; // เรียกใช้ Supabase Client
 
 const galleryItems = [
   {
     id: 0,
     type: 'wedding',
     title: 'งานแต่งงานสไตล์ Tropical Sunset',
-    img: "/images/Tropical Sunset.jpg",
+    img: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
     eventTypeSelect: 'งานแต่งงาน',
     foodStyleSelect: 'ค็อกเทล (Cocktail)',
     concept: 'พิธีหมั้นและฉลองมงคลสมรสริมชายหาดยามพระอาทิตย์ตกดิน เน้นดอกไม้เขตร้อนสีสดใส ผสมผสานความหรูหราแบบเป็นกันเอง ได้รับแรงบันดาลใจจากแสงยามเย็นของท้องทะเลภูเก็ต',
@@ -33,7 +34,7 @@ const galleryItems = [
     id: 1,
     type: 'wedding',
     title: 'พิธีมงคลสมรสริมหาดทรายขาว',
-    img: '/images/lifestyleasia.jpg',
+    img: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80',
     eventTypeSelect: 'งานแต่งงาน',
     foodStyleSelect: 'บุฟเฟ่ต์ (Buffet)',
     concept: 'งานแต่งงานเน้นความอบอุ่น โรแมนติก และมินิมอลบนหาดส่วนตัว สัมผัสทรายขาวยาวเหยียดใต้ร่มเงาต้นมะพร้าว ตกแต่งเรียบง่ายแต่สะท้อนรสนิยม',
@@ -57,7 +58,7 @@ const galleryItems = [
     id: 2,
     type: 'birthday',
     title: 'งานวันเกิด Luxury Pool Party',
-    img: '/images/Luxury Pool Party.jpg',
+    img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=800&q=80',
     eventTypeSelect: 'วันเกิดผู้ใหญ่',
     foodStyleSelect: 'ค็อกเทล (Cocktail)',
     concept: 'ปาร์ตี้วันเกิดพูลวิลล่าสไตล์ชิค สนุกสนานริมสระน้ำส่วนตัว ตกแต่งแสงสีนีออนและลูกโป่งแฟนซี ให้บรรยากาศแบบคลับหรูหราส่วนตัว',
@@ -82,7 +83,7 @@ const galleryItems = [
     id: 3,
     type: 'party',
     title: 'Beach Dinner Party ใต้แสงดาว',
-    img: '/images/Beach Dinner Party.jpg',
+    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
     eventTypeSelect: 'ปาร์ตี้ริมหาด',
     foodStyleSelect: 'บุฟเฟ่ต์ (Buffet)',
     concept: 'งานเลี้ยงสังสรรค์ริมชายหาดส่วนตัว บรรยากาศสบายๆ สไตล์ Bohemian Chill เคล้าเสียงคลื่นและแสงเทียน เหมาะสำหรับการรวมตัวเพื่อนฝูง',
@@ -106,7 +107,7 @@ const galleryItems = [
     id: 4,
     type: 'birthday',
     title: 'ปาร์ตี้วันเกิดเด็กธีมกะลาสีเรือ',
-    img: '/images/captainboy.jpg',
+    img: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80',
     eventTypeSelect: 'วันเกิดเด็ก',
     foodStyleSelect: 'อาหารกล่อง / Box Set และ Snack Box',
     concept: 'ปาร์ตี้วันเกิดเด็กสุดสดใส ธีมการผจญภัยในท้องทะเล มีฐานกิจกรรม เกม และซุ้มถ่ายภาพสุดน่ารักสำหรับเด็กๆ และครอบครัว',
@@ -130,7 +131,7 @@ const galleryItems = [
     id: 5,
     type: 'party',
     title: 'งานเลี้ยงสังสรรค์ค็อกเทลยามเย็น',
-    img: '/images/cocktail.jpg',
+    img: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=80',
     eventTypeSelect: 'งานเลี้ยงบริษัท',
     foodStyleSelect: 'ซิทดาวน์ ดินเนอร์ (Sit-down Dinner)',
     concept: 'งานเลี้ยงต้อนรับหรือ Gala Evening แบบเป็นทางการ หรูหรา เรียบหรู เหมาะกับงานเลี้ยงผู้บริหาร งานฉลองความสำเร็จ หรือรับรองลูกค้า VIP',
@@ -174,7 +175,7 @@ export default function Home() {
   const [hasSnack, setHasSnack] = useState(true);
   const [dietaryReq, setDietaryReq] = useState('อาหารทั่วไป พร้อมเมนูเด็ก');
 
-  // Percentage State (ใช้เก็บสัดส่วนเบื้องหลัง)
+  // Percentage State
   const [foodPct, setFoodPct] = useState(30);
   const [snackPct, setSnackPct] = useState(10);
   const [venuePct, setVenuePct] = useState(30);
@@ -195,13 +196,26 @@ export default function Home() {
   const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPass, setSignupPass] = useState('');
+  const [confirmSignupPass, setConfirmSignupPass] = useState(''); // รหัสผ่านช่องที่ 2
 
-  // ดึงวันที่ปัจจุบัน ณ วันที่กดรีโหลดหน้าเว็บ
+  // ดึงเซสชันผู้ใช้จาก Supabase เมื่อเปิดเว็บ
   useEffect(() => {
-    const session = localStorage.getItem('eventcraft_current_session');
-    if (session) {
-      setCurrentUser(JSON.parse(session));
-    }
+    const checkUserSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setCurrentUser({
+          name: session.user.user_metadata?.full_name || session.user.email,
+          email: session.user.email
+        });
+      } else {
+        const guestSession = localStorage.getItem('eventcraft_current_session');
+        if (guestSession) {
+          setCurrentUser(JSON.parse(guestSession));
+        }
+      }
+    };
+
+    checkUserSession();
 
     const today = new Date().toISOString().split('T')[0];
     setEventDate(today);
@@ -236,46 +250,72 @@ export default function Home() {
     return re.test(pass);
   };
 
-  const handleSignup = (e) => {
+  // สมัครสมาชิกด้วย Supabase + ตรวจสอบรหัสผ่าน 2 รอบ
+  const handleSignup = async (e) => {
     e.preventDefault();
+
+    // 1. ตรวจสอบว่ารหัสผ่านทั้งสองช่องตรงกันหรือไม่
+    if (signupPass !== confirmSignupPass) {
+      alert("รหัสผ่านทั้ง 2 ช่องไม่ตรงกัน! กรุณาตรวจสอบและพิมพ์ใหม่อีกครั้ง");
+      return;
+    }
+
+    // 2. ตรวจสอบความปลอดภัยของรหัสผ่าน
     if (!validatePassword(signupPass)) {
       alert("รหัสผ่านไม่ตรงตามเงื่อนไข!\nกรุณาใช้รหัสผ่านที่มีความยาวอย่างน้อย 6 ตัวอักษร และประกอบด้วยตัวอักษรภาษาอังกฤษ, ตัวเลข และอักขระพิเศษ");
       return;
     }
-    let accounts = JSON.parse(localStorage.getItem('eventcraft_accounts')) || [];
-    const emailLower = signupEmail.trim().toLowerCase();
-    if (accounts.some(u => u.email === emailLower)) {
-      alert("อีเมลนี้ถูกลงทะเบียนไว้แล้ว กรุณาเข้าสู่ระบบด้วยอีเมลนี้");
-      setAuthTab('login');
+
+    // 3. ส่งข้อมูลสมัครไปยัง Supabase Authentication
+    const { data, error } = await supabase.auth.signUp({
+      email: signupEmail.trim().toLowerCase(),
+      password: signupPass,
+      options: {
+        data: { full_name: signupName.trim() }
+      }
+    });
+
+    if (error) {
+      alert(`สมัครสมาชิกไม่สำเร็จ: ${error.message}`);
       return;
     }
-    const newUser = { name: signupName.trim(), email: emailLower, password: signupPass };
-    accounts.push(newUser);
-    localStorage.setItem('eventcraft_accounts', JSON.stringify(accounts));
-    
-    const sessionUser = { name: newUser.name, email: newUser.email };
-    setCurrentUser(sessionUser);
-    localStorage.setItem('eventcraft_current_session', JSON.stringify(sessionUser));
 
-    alert(`สมัครสมาชิกสำเร็จ! ยินดีต้อนรับคุณ ${newUser.name}`);
+    const sessionUser = {
+      name: signupName.trim(),
+      email: signupEmail.trim().toLowerCase()
+    };
+    setCurrentUser(sessionUser);
+
+    alert(`สมัครสมาชิกสำเร็จ! ยินดีต้อนรับคุณ ${sessionUser.name}`);
     setAuthModalOpen(false);
+    setSignupPass('');
+    setConfirmSignupPass('');
     resetPlannerForm();
   };
 
-  const handleLogin = (e) => {
+  // เข้าสู่ระบบด้วย Supabase
+  const handleLogin = async (e) => {
     e.preventDefault();
-    let accounts = JSON.parse(localStorage.getItem('eventcraft_accounts')) || [];
     const emailLower = loginEmail.trim().toLowerCase();
-    const found = accounts.find(u => u.email === emailLower && u.password === loginPass);
-    if (found) {
-      const sessionUser = { name: found.name, email: found.email };
-      setCurrentUser(sessionUser);
-      localStorage.setItem('eventcraft_current_session', JSON.stringify(sessionUser));
-      setAuthModalOpen(false);
-      resetPlannerForm();
-    } else {
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: emailLower,
+      password: loginPass
+    });
+
+    if (error) {
       alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง");
+      return;
     }
+
+    const sessionUser = {
+      name: data.user.user_metadata?.full_name || data.user.email,
+      email: data.user.email
+    };
+    setCurrentUser(sessionUser);
+    setAuthModalOpen(false);
+    setLoginPass('');
+    resetPlannerForm();
   };
 
   const guestLogin = () => {
@@ -286,14 +326,14 @@ export default function Home() {
     resetPlannerForm();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setCurrentUser(null);
     localStorage.removeItem('eventcraft_current_session');
     setProfileModalOpen(false);
     resetPlannerForm();
   };
 
-  // ตรวจสอบห้ามไม่ให้ผู้ใช้โหมด Guest บันทึกแผนงาน
   const saveUserPlan = () => {
     if (!currentUser || currentUser.email === 'guest_demo') {
       alert("โหมดทดลองใช้งาน (Guest) ไม่สามารถบันทึกแผนงานได้!\nกรุณาสมัครสมาชิกหรือเข้าสู่ระบบด้วยบัญชีจริงเพื่อบันทึกข้อมูลของคุณ");
@@ -412,7 +452,7 @@ export default function Home() {
     ? galleryItems
     : galleryItems.filter(i => i.type === galleryFilter);
 
-  // คำนวณตัวเลขงบประมาณและยอดเงินบาทไดนามิก
+  // คำนวณตัวเลขงบประมาณ
   const totalGuests = Number(adultCount) + Number(kidCount) || 1;
   const totalBudgetNum = Number(eventBudget) || 0;
 
@@ -766,7 +806,7 @@ export default function Home() {
                         <p className="text-[11px] text-slate-400 pl-5">ระบบจัดสรรงบอาหารว่างตามตัวเลขเงินที่คุณระบุ (ปรับแก้ได้ทางด้านขวา)</p>
                       </div>
 
-                      {/* ส่วนคำนวณอาหารว่าง: สอดคล้องตามงบรวม (eventBudget) */}
+                      {/* ส่วนคำนวณอาหารว่าง */}
                       {hasSnack && (
                         <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-4 text-xs space-y-2 text-slate-300">
                           <div className="flex justify-between items-center mb-1">
@@ -795,7 +835,7 @@ export default function Home() {
                         </div>
                       )}
 
-                      {/* ส่วนคำนวณอาหารหลัก: สอดคล้องตามงบรวม (eventBudget) */}
+                      {/* ส่วนคำนวณอาหารหลัก */}
                       <div className="bg-slate-800/50 border border-slate-700/80 rounded-2xl p-4 text-xs space-y-2.5 text-slate-300">
                         <div className="flex justify-between items-center">
                           <h4 className="font-bold text-white text-sm flex items-center gap-1.5">
@@ -810,7 +850,6 @@ export default function Home() {
                           <strong className="text-indigo-300">{foodStyle}</strong> — {foodMarket.desc}
                         </p>
 
-                        {/* กล่องแสดงผลราคาประเมินตามงบที่ผู้ใช้ตั้งจริง */}
                         <div className={`p-3 rounded-xl border space-y-1.5 ${foodMarket.isSufficient ? 'bg-emerald-950/40 border-emerald-500/30' : 'bg-amber-950/40 border-amber-500/30'}`}>
                           <div className="flex justify-between items-center">
                             <span className="text-slate-300 text-[11px]">งบอาหารหลักที่จัดสรรไว้:</span>
@@ -824,7 +863,6 @@ export default function Home() {
                             </span>
                           </div>
 
-                          {/* แสดงสถานะประเมินงบประมาณ */}
                           <div className="pt-1.5">
                             {foodMarket.isSufficient ? (
                               <p className="text-[11px] text-emerald-300 flex items-center gap-1 font-semibold">
@@ -879,7 +917,7 @@ export default function Home() {
                         <div className="py-2.5 flex justify-between"><span className="text-slate-400">งบประมาณรวม</span><span className="font-bold text-indigo-400 text-sm">฿{Number(eventBudget).toLocaleString()}</span></div>
                       </div>
 
-                      {/* Direct Baht Amount Controls & Visual Breakdown */}
+                      {/* Direct Baht Amount Controls */}
                       <div className="mt-5 pt-4 border-t border-slate-800 space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
@@ -1015,7 +1053,7 @@ export default function Home() {
         )}
       </main>
 
-      {/* Guide Modal (ป๊อปอัปคำแนะนำการใช้งาน) */}
+      {/* Guide Modal */}
       {guideModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-2xl relative shadow-2xl space-y-6 text-slate-100 max-h-[90vh] overflow-y-auto">
@@ -1038,7 +1076,7 @@ export default function Home() {
                   เข้าสู่ระบบ หรือ สมัครสมาชิก
                 </h4>
                 <p className="text-slate-300 leading-relaxed text-xs">
-                  คลิกที่ปุ่ม <strong>"เข้าสู่ระบบ / สมัครสมาชิก"</strong> ที่มุมขวาบนเพื่อลงทะเบียนบัญชีส่วนตัว หรือกดทดลองใช้งานในฐานะแขก (Demo) เพื่อทดลองการใช้งาน
+                  คลิกที่ปุ่ม <strong>"เข้าสู่ระบบ / สมัครสมาชิก"</strong> ที่มุมขวาบนเพื่อลงทะเบียนบัญชีส่วนตัวผ่าน Supabase หรือกดทดลองใช้งานในฐานะแขก (Demo)
                 </p>
               </div>
 
@@ -1077,106 +1115,6 @@ export default function Home() {
               <button onClick={() => setGuideModalOpen(false)} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl cursor-pointer">
                 รับทราบ และ เริ่มใช้งาน
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Gallery Detail Modal */}
-      {galleryModalTheme && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative shadow-2xl text-slate-100 p-6 sm:p-8 space-y-6">
-            <button onClick={() => setGalleryModalTheme(null)} className="absolute top-4 right-4 w-9 h-9 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-full flex items-center justify-center transition-all z-10 cursor-pointer">
-              <i className="fa-solid fa-xmark text-base"></i>
-            </button>
-            <div className="relative h-64 sm:h-80 rounded-2xl overflow-hidden border border-slate-800">
-              <img src={galleryModalTheme.img} alt={galleryModalTheme.title} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
-              <div className="absolute bottom-4 left-4 right-4">
-                <span className="px-3 py-1 bg-indigo-600/80 backdrop-blur-md text-white text-[11px] font-bold rounded-full mb-2 inline-block border border-indigo-400/30">
-                  {galleryModalTheme.eventTypeSelect}
-                </span>
-                <h3 className="text-2xl sm:text-3xl font-bold text-white">{galleryModalTheme.title}</h3>
-              </div>
-            </div>
-
-            <div className="space-y-6 text-xs sm:text-sm">
-              <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-1">
-                <h4 className="font-bold text-indigo-400 text-xs uppercase tracking-wider flex items-center gap-2">
-                  <i className="fa-solid fa-lightbulb"></i> แนวคิด & บรรยากาศงาน (CONCEPT)
-                </h4>
-                <p className="text-slate-300 leading-relaxed">{galleryModalTheme.concept}</p>
-              </div>
-
-              {galleryModalTheme.colors && (
-                <div>
-                  <h4 className="font-bold text-indigo-400 text-xs uppercase tracking-wider mb-2.5 flex items-center gap-2">
-                    <i className="fa-solid fa-palette"></i> โทนสีหลักของการตกแต่ง (COLOR PALETTE)
-                  </h4>
-                  <div className="flex flex-wrap gap-2.5">
-                    {galleryModalTheme.colors.map((col, idx) => (
-                      <div key={idx} className="flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl">
-                        <span className="w-4 h-4 rounded-full shadow-inner border border-white/20" style={{ backgroundColor: col.hex }}></span>
-                        <span className="text-xs text-slate-200 font-medium">{col.name}</span>
-                        <span className="text-[10px] text-slate-500 uppercase">{col.hex}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {galleryModalTheme.decorations && (
-                <div>
-                  <h4 className="font-bold text-indigo-400 text-xs uppercase tracking-wider mb-2.5 flex items-center gap-2">
-                    <i className="fa-solid fa-wand-magic-sparkles"></i> องค์ประกอบการตกแต่งหลัก (DECORATION HIGHLIGHTS)
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {galleryModalTheme.decorations.map((item, idx) => (
-                      <div key={idx} className="flex items-start gap-2 bg-slate-800/60 p-2.5 rounded-xl border border-slate-800 text-slate-300 text-xs">
-                        <i className="fa-solid fa-circle-check text-emerald-400 mt-0.5 text-xs"></i>
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {galleryModalTheme.foodRec && (
-                <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-4">
-                  <h4 className="font-bold text-indigo-400 text-xs uppercase tracking-wider mb-1 flex items-center gap-2">
-                    <i className="fa-solid fa-utensils"></i> รูปแบบอาหาร & เครื่องดื่มแนะนำ
-                  </h4>
-                  <p className="text-slate-300 leading-relaxed text-xs">{galleryModalTheme.foodRec}</p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                {galleryModalTheme.bestTime && (
-                  <div className="bg-slate-800/60 p-3.5 rounded-2xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1">
-                      <i className="fa-solid fa-clock text-amber-400 mr-1"></i> ช่วงเวลาจัดงานที่แนะนำ
-                    </span>
-                    <span className="text-slate-200 font-semibold">{galleryModalTheme.bestTime}</span>
-                  </div>
-                )}
-                {galleryModalTheme.recommendedVenues && (
-                  <div className="bg-slate-800/60 p-3.5 rounded-2xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1">
-                      <i className="fa-solid fa-location-dot text-rose-400 mr-1"></i> สถานที่จัดงานแนะนำในภูเก็ต
-                    </span>
-                    <span className="text-slate-200 font-semibold">{galleryModalTheme.recommendedVenues}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-4 border-t border-slate-800 flex justify-end gap-3">
-                <button onClick={() => setGalleryModalTheme(null)} className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition-colors cursor-pointer">
-                  ปิด
-                </button>
-                <button onClick={() => applyThemeToPlanner(galleryModalTheme)} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-lg transition-all flex items-center gap-2 cursor-pointer">
-                  <span>นำธีมนี้ไปใช้วางแผนงาน</span> <i className="fa-solid fa-arrow-right"></i>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -1232,7 +1170,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Auth Modal */}
+      {/* Auth Modal (ล็อกอิน / สมัครสมาชิกแบบกรอกรหัสผ่าน 2 รอบ) */}
       {authModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-sm p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-md relative shadow-2xl">
@@ -1254,7 +1192,13 @@ export default function Home() {
               <form onSubmit={handleSignup} className="space-y-4">
                 <input type="text" required placeholder="ชื่อ - นามสกุล" value={signupName} onChange={(e) => setSignupName(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white" />
                 <input type="email" required placeholder="อีเมล" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white" />
-                <input type="password" required placeholder="รหัสผ่าน" value={signupPass} onChange={(e) => setSignupPass(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white" />
+                
+                {/* รหัสผ่านรอบที่ 1 */}
+                <input type="password" required placeholder="ตั้งรหัสผ่าน" value={signupPass} onChange={(e) => setSignupPass(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white" />
+                
+                {/* รหัสผ่านรอบที่ 2 (ยืนยันรหัสผ่าน) */}
+                <input type="password" required placeholder="ยืนยันรหัสผ่านอีกครั้ง" value={confirmSignupPass} onChange={(e) => setConfirmSignupPass(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white" />
+                
                 <p className="text-[10px] text-indigo-300">รหัสผ่านต้องมีตัวอักษร, ตัวเลข และอักขระพิเศษอย่างน้อย 6 ตัวอักษร</p>
                 <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs cursor-pointer">สมัครสมาชิก</button>
               </form>
