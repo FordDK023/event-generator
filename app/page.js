@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { phuketVenues } from './venues';
-import { supabase } from '../lib/supabase.js'; // เรียกใช้ Supabase Client
+import { supabase } from '../lib/supabase.js';
 
 const galleryItems = [
   {
@@ -160,6 +160,7 @@ export default function Home() {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [galleryModalTheme, setGalleryModalTheme] = useState(null);
   const [guideModalOpen, setGuideModalOpen] = useState(false);
+  const [selectedPlanSummary, setSelectedPlanSummary] = useState(null);
 
   // Form State
   const [eventName, setEventName] = useState('วันเกิดน้องมินา');
@@ -196,9 +197,8 @@ export default function Home() {
   const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPass, setSignupPass] = useState('');
-  const [confirmSignupPass, setConfirmSignupPass] = useState(''); // รหัสผ่านช่องที่ 2
+  const [confirmSignupPass, setConfirmSignupPass] = useState('');
 
-  // ดึงเซสชันผู้ใช้จาก Supabase เมื่อเปิดเว็บ
   useEffect(() => {
     const checkUserSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -250,23 +250,19 @@ export default function Home() {
     return re.test(pass);
   };
 
-  // สมัครสมาชิกด้วย Supabase + ตรวจสอบรหัสผ่าน 2 รอบ
   const handleSignup = async (e) => {
     e.preventDefault();
 
-    // 1. ตรวจสอบว่ารหัสผ่านทั้งสองช่องตรงกันหรือไม่
     if (signupPass !== confirmSignupPass) {
       alert("รหัสผ่านทั้ง 2 ช่องไม่ตรงกัน! กรุณาตรวจสอบและพิมพ์ใหม่อีกครั้ง");
       return;
     }
 
-    // 2. ตรวจสอบความปลอดภัยของรหัสผ่าน
     if (!validatePassword(signupPass)) {
       alert("รหัสผ่านไม่ตรงตามเงื่อนไข!\nกรุณาใช้รหัสผ่านที่มีความยาวอย่างน้อย 6 ตัวอักษร และประกอบด้วยตัวอักษรภาษาอังกฤษ, ตัวเลข และอักขระพิเศษ");
       return;
     }
 
-    // 3. ส่งข้อมูลสมัครไปยัง Supabase Authentication
     const { data, error } = await supabase.auth.signUp({
       email: signupEmail.trim().toLowerCase(),
       password: signupPass,
@@ -293,7 +289,6 @@ export default function Home() {
     resetPlannerForm();
   };
 
-  // เข้าสู่ระบบด้วย Supabase
   const handleLogin = async (e) => {
     e.preventDefault();
     const emailLower = loginEmail.trim().toLowerCase();
@@ -364,7 +359,9 @@ export default function Home() {
       snackPct,
       venuePct,
       decorPct,
-      techPct
+      techPct,
+      aiPreviewUrl,
+      aiCaption
     };
 
     let userPlans = JSON.parse(localStorage.getItem(`eventcraft_history_${currentUser.email}`)) || [];
@@ -401,7 +398,12 @@ export default function Home() {
     if (plan.venuePct !== undefined) setVenuePct(plan.venuePct);
     if (plan.decorPct !== undefined) setDecorPct(plan.decorPct);
     if (plan.techPct !== undefined) setTechPct(plan.techPct);
+    if (plan.aiPreviewUrl) {
+      setAiPreviewUrl(plan.aiPreviewUrl);
+      setAiCaption(plan.aiCaption || 'ภาพจำลองบรรยากาศงาน');
+    }
     setProfileModalOpen(false);
+    setSelectedPlanSummary(null);
     setPage('planner');
     alert(`โหลดแผนงาน "${plan.eventName}" เรียบร้อยแล้ว!`);
   };
@@ -412,6 +414,7 @@ export default function Home() {
     userPlans = userPlans.filter(p => p.id !== planId);
     localStorage.setItem(`eventcraft_history_${currentUser.email}`, JSON.stringify(userPlans));
     setSavedPlansList(userPlans);
+    if (selectedPlanSummary?.id === planId) setSelectedPlanSummary(null);
   };
 
   const generateAIPreview = () => {
@@ -441,6 +444,10 @@ export default function Home() {
     setEventType(theme.eventTypeSelect);
     setEventName(`งาน${theme.title}`);
     setFoodStyle(theme.foodStyleSelect);
+    if (theme.img) {
+      setAiPreviewUrl(theme.img);
+      setAiCaption(`ตัวอย่างบรรยากาศ ${theme.title}`);
+    }
   };
 
   const filteredVenues = phuketVenues.filter(v =>
@@ -500,7 +507,7 @@ export default function Home() {
   return (
     <>
       {/* Header Nav */}
-      <nav className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+      <nav className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setPage('showcase')}>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-400 flex items-center justify-center text-white font-bold text-xl shadow-lg">
@@ -545,7 +552,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <main className="flex-grow">
+      <main className="flex-grow no-print">
         {/* PAGE 1: SHOWCASE */}
         {page === 'showcase' && (
           <div>
@@ -770,7 +777,6 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* ช่องช่วงเวลาจัดงาน */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-semibold text-slate-300 mb-1">เวลาเริ่มงาน</label>
@@ -797,7 +803,6 @@ export default function Home() {
                         ))}
                       </div>
 
-                      {/* Checkbox อาหารว่าง */}
                       <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-3.5 space-y-1">
                         <label className="flex items-center gap-2 text-xs font-semibold text-slate-200 cursor-pointer">
                           <input type="checkbox" checked={hasSnack} onChange={(e) => setHasSnack(e.target.checked)} className="accent-indigo-500 rounded cursor-pointer" />
@@ -806,7 +811,6 @@ export default function Home() {
                         <p className="text-[11px] text-slate-400 pl-5">ระบบจัดสรรงบอาหารว่างตามตัวเลขเงินที่คุณระบุ (ปรับแก้ได้ทางด้านขวา)</p>
                       </div>
 
-                      {/* ส่วนคำนวณอาหารว่าง */}
                       {hasSnack && (
                         <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-4 text-xs space-y-2 text-slate-300">
                           <div className="flex justify-between items-center mb-1">
@@ -835,7 +839,6 @@ export default function Home() {
                         </div>
                       )}
 
-                      {/* ส่วนคำนวณอาหารหลัก */}
                       <div className="bg-slate-800/50 border border-slate-700/80 rounded-2xl p-4 text-xs space-y-2.5 text-slate-300">
                         <div className="flex justify-between items-center">
                           <h4 className="font-bold text-white text-sm flex items-center gap-1.5">
@@ -881,7 +884,6 @@ export default function Home() {
                         )}
                       </div>
 
-                      {/* ดรอปดาวน์ความต้องการด้านอาหาร */}
                       <div className="space-y-1.5 pt-2">
                         <label className="block text-xs font-semibold text-slate-300">ความต้องการด้านอาหาร</label>
                         <select value={dietaryReq} onChange={(e) => setDietaryReq(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
@@ -917,7 +919,6 @@ export default function Home() {
                         <div className="py-2.5 flex justify-between"><span className="text-slate-400">งบประมาณรวม</span><span className="font-bold text-indigo-400 text-sm">฿{Number(eventBudget).toLocaleString()}</span></div>
                       </div>
 
-                      {/* Direct Baht Amount Controls */}
                       <div className="mt-5 pt-4 border-t border-slate-800 space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
@@ -929,7 +930,6 @@ export default function Home() {
                         </div>
 
                         <div className="space-y-3 text-xs">
-                          {/* อาหารหลัก */}
                           <div className="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800/80">
                             <div className="flex justify-between items-center text-slate-300 text-[11px] mb-1.5">
                               <span className="font-medium text-white">ค่าอาหาร & เครื่องดื่ม</span>
@@ -950,7 +950,6 @@ export default function Home() {
                             </div>
                           </div>
 
-                          {/* อาหารว่าง */}
                           {hasSnack && (
                             <div className="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800/80">
                               <div className="flex justify-between items-center text-slate-300 text-[11px] mb-1.5">
@@ -973,7 +972,6 @@ export default function Home() {
                             </div>
                           )}
 
-                          {/* สถานที่ */}
                           <div className="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800/80">
                             <div className="flex justify-between items-center text-slate-300 text-[11px] mb-1.5">
                               <span className="font-medium text-white">ค่าสถานที่ & อุปกรณ์</span>
@@ -994,7 +992,6 @@ export default function Home() {
                             </div>
                           </div>
 
-                          {/* ตกแต่ง */}
                           <div className="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800/80">
                             <div className="flex justify-between items-center text-slate-300 text-[11px] mb-1.5">
                               <span className="font-medium text-white">ค่าตกแต่ง & ดอกไม้</span>
@@ -1015,7 +1012,6 @@ export default function Home() {
                             </div>
                           </div>
 
-                          {/* ช่างภาพ & เครื่องเสียง */}
                           <div className="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800/80">
                             <div className="flex justify-between items-center text-slate-300 text-[11px] mb-1.5">
                               <span className="font-medium text-white">ช่างภาพ & เครื่องเสียง</span>
@@ -1053,9 +1049,101 @@ export default function Home() {
         )}
       </main>
 
-      {/* Guide Modal */}
+      {/* MODAL 1: Gallery Theme Detail Modal */}
+      {galleryModalTheme && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 no-print" onClick={() => setGalleryModalTheme(null)}>
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-2xl relative shadow-2xl space-y-5 text-slate-100 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setGalleryModalTheme(null)} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer">
+              <i className="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div className="relative h-56 sm:h-64 w-full rounded-2xl overflow-hidden bg-slate-800 border border-slate-800">
+              <img src={galleryModalTheme.img} alt={galleryModalTheme.title} className="w-full h-full object-cover" />
+            </div>
+
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span className="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 text-xs font-semibold border border-indigo-500/20">
+                  {galleryModalTheme.eventTypeSelect}
+                </span>
+                <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-300 text-xs font-semibold border border-purple-500/20">
+                  {galleryModalTheme.foodStyleSelect}
+                </span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white">{galleryModalTheme.title}</h3>
+              {galleryModalTheme.bestTime && (
+                <p className="text-xs text-indigo-400 font-medium mt-1">
+                  <i className="fa-solid fa-clock mr-1"></i> ช่วงเวลาแนะนำ: {galleryModalTheme.bestTime}
+                </p>
+              )}
+              <p className="text-xs sm:text-sm text-slate-300 mt-3 leading-relaxed">
+                {galleryModalTheme.concept}
+              </p>
+            </div>
+
+            {galleryModalTheme.colors && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                  <i className="fa-solid fa-palette mr-1.5"></i> โทนสีหลัก (Color Palette)
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {galleryModalTheme.colors.map((c, i) => (
+                    <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/70 text-xs text-slate-200">
+                      <span className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-sm" style={{ backgroundColor: c.hex }}></span>
+                      <span>{c.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {galleryModalTheme.decorations && (
+              <div className="bg-slate-800/50 border border-slate-800 p-4 rounded-2xl space-y-2">
+                <h4 className="font-bold text-indigo-300 text-xs uppercase tracking-wider">
+                  <i className="fa-solid fa-sparkles mr-1.5"></i> องค์ประกอบการตกแต่งหลัก
+                </h4>
+                <ul className="space-y-1.5 text-xs text-slate-300">
+                  {galleryModalTheme.decorations.map((d, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <i className="fa-solid fa-circle-dot text-[8px] text-indigo-400 mt-1"></i>
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {galleryModalTheme.foodRec && (
+              <div className="bg-indigo-950/30 border border-indigo-500/20 p-4 rounded-2xl space-y-1">
+                <h4 className="font-bold text-indigo-300 text-xs uppercase tracking-wider">
+                  <i className="fa-solid fa-utensils mr-1.5"></i> ข้อเสนอแนะเมนูอาหาร
+                </h4>
+                <p className="text-xs text-slate-300 leading-relaxed">{galleryModalTheme.foodRec}</p>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => applyThemeToPlanner(galleryModalTheme)}
+                className="flex-1 py-3 px-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl text-xs sm:text-sm transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <i className="fa-solid fa-wand-magic-sparkles"></i>
+                <span>✨ นำธีมนี้ไปสร้างงาน & ปรับแต่งของคุณ</span>
+              </button>
+              <button
+                onClick={() => setGalleryModalTheme(null)}
+                className="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition-colors cursor-pointer"
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: Guide Modal */}
       {guideModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 no-print">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-2xl relative shadow-2xl space-y-6 text-slate-100 max-h-[90vh] overflow-y-auto">
             <button onClick={() => setGuideModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"><i className="fa-solid fa-xmark text-lg"></i></button>
 
@@ -1120,10 +1208,10 @@ export default function Home() {
         </div>
       )}
 
-      {/* Profile Modal */}
+      {/* MODAL 3: Profile & Saved Plans List Modal */}
       {profileModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-lg relative shadow-2xl space-y-6 text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 no-print">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-xl relative shadow-2xl space-y-6 text-slate-100 max-h-[85vh] overflow-y-auto">
             <button onClick={() => setProfileModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"><i className="fa-solid fa-xmark text-lg"></i></button>
             <div className="flex items-center gap-4 border-b border-slate-800 pb-4">
               <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
@@ -1137,7 +1225,7 @@ export default function Home() {
 
             <div>
               <h4 className="text-xs font-bold text-indigo-400 uppercase mb-3"><i className="fa-solid fa-clock-rotate-left mr-1"></i> ประวัติแผนงานที่บันทึกไว้</h4>
-              <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+              <div className="space-y-3 pr-1">
                 {currentUser?.email === 'guest_demo' ? (
                   <div className="text-center py-6 space-y-2">
                     <p className="text-xs text-amber-400 font-semibold">โหมดทดลองใช้งาน (Guest) ไม่สามารถบันทึกประวัติแผนงานได้</p>
@@ -1147,14 +1235,22 @@ export default function Home() {
                   <p className="text-xs text-slate-500 text-center py-6">ยังไม่มีแผนงานที่บันทึกไว้</p>
                 ) : (
                   savedPlansList.map(plan => (
-                    <div key={plan.id} className="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl flex justify-between items-center gap-3">
+                    <div key={plan.id} className="bg-slate-800/60 border border-slate-700/60 p-3.5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                       <div>
                         <h5 className="font-bold text-white text-xs">{plan.eventName}</h5>
-                        <p className="text-[11px] text-slate-400">แขก {plan.totalGuests} คน | ฿{plan.eventBudget.toLocaleString()}</p>
+                        <p className="text-[11px] text-slate-400">บันทึกเมื่อ: {plan.savedAt}</p>
+                        <p className="text-indigo-300 text-xs mt-0.5">แขก {plan.totalGuests} คน | ฿{Number(plan.eventBudget).toLocaleString()} บาท</p>
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => loadPlanFromHistory(plan)} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold cursor-pointer">ดึงข้อมูล</button>
-                        <button onClick={() => deletePlanFromHistory(plan.id)} className="px-2.5 py-1.5 bg-slate-700 hover:bg-red-600 text-slate-300 rounded-lg text-xs cursor-pointer"><i className="fa-solid fa-trash-can"></i></button>
+                      <div className="flex flex-wrap gap-1.5 w-full sm:w-auto justify-end">
+                        <button onClick={() => setSelectedPlanSummary(plan)} className="px-2.5 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-medium transition cursor-pointer">
+                          <i className="fa-solid fa-file-lines mr-1"></i> ดูสรุปฉบับเต็ม
+                        </button>
+                        <button onClick={() => loadPlanFromHistory(plan)} className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold cursor-pointer transition">
+                          ดึงข้อมูล
+                        </button>
+                        <button onClick={() => deletePlanFromHistory(plan.id)} className="px-2 py-1.5 bg-slate-700 hover:bg-red-600 text-slate-300 rounded-xl text-xs cursor-pointer transition">
+                          <i className="fa-solid fa-trash-can"></i>
+                        </button>
                       </div>
                     </div>
                   ))
@@ -1170,9 +1266,153 @@ export default function Home() {
         </div>
       )}
 
-      {/* Auth Modal (ล็อกอิน / สมัครสมาชิกแบบกรอกรหัสผ่าน 2 รอบ) */}
+      {/* MODAL 4: Full Event Brief / Plan Summary Modal (ปรับปรุงให้พิมพ์ 1 หน้า A4 คมชัด) */}
+      {selectedPlanSummary && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 print-modal-overlay" onClick={() => setSelectedPlanSummary(null)}>
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-2xl relative shadow-2xl space-y-5 text-slate-100 max-h-[92vh] overflow-y-auto print-card-content" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setSelectedPlanSummary(null)} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer no-print">
+              <i className="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            {/* Header สรุปงาน */}
+            <div className="border-b border-slate-800 pb-4">
+              <span className="text-[10px] font-bold text-indigo-400 tracking-widest uppercase bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">
+                EVENT BRIEF SUMMARY
+              </span>
+              <h2 className="text-2xl font-bold text-white mt-2">{selectedPlanSummary.eventName}</h2>
+              <p className="text-xs text-slate-400 mt-1">
+                บันทึกเมื่อ: {selectedPlanSummary.savedAt} • ประเภทงาน: <strong className="text-indigo-300">{selectedPlanSummary.eventType}</strong>
+              </p>
+            </div>
+
+            {/* รูปภาพบรรยากาศ AI */}
+            {selectedPlanSummary.aiPreviewUrl && (
+              <div className="relative h-44 sm:h-52 w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">
+                <img src={selectedPlanSummary.aiPreviewUrl} alt="AI Preview Summary" className="w-full h-full object-cover" />
+                <div className="absolute bottom-2 left-2 bg-black/75 px-3 py-1 rounded-lg text-[11px] text-slate-200 backdrop-blur-sm no-print">
+                  {selectedPlanSummary.aiCaption || "ภาพจำลองบรรยากาศงาน"}
+                </div>
+              </div>
+            )}
+
+            {/* ข้อมูลทั่วไปของงาน */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 print-box">
+                <span className="text-slate-400 block text-[10px]">ผู้ใหญ่</span>
+                <span className="font-bold text-white text-sm">{selectedPlanSummary.adultCount} คน</span>
+              </div>
+              <div className="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 print-box">
+                <span className="text-slate-400 block text-[10px]">เด็ก</span>
+                <span className="font-bold text-white text-sm">{selectedPlanSummary.kidCount} คน</span>
+              </div>
+              <div className="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 print-box">
+                <span className="text-slate-400 block text-[10px]">ผู้ร่วมงานรวม</span>
+                <span className="font-bold text-indigo-300 text-sm">{selectedPlanSummary.totalGuests} คน</span>
+              </div>
+              <div className="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 print-box">
+                <span className="text-slate-400 block text-[10px]">วันที่จัดงาน</span>
+                <span className="font-bold text-white text-xs">{selectedPlanSummary.eventDate || 'ไม่ระบุ'}</span>
+              </div>
+            </div>
+
+            {/* ตารางจัดสรรงบประมาณ */}
+            <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-3 text-xs print-box">
+              <div className="flex justify-between items-center border-b border-slate-700/80 pb-2">
+                <h4 className="font-bold text-white flex items-center gap-1.5 text-sm">
+                  <i className="fa-solid fa-coins text-amber-400 no-print"></i> ตารางสรุปงบประมาณจัดสรร
+                </h4>
+                <span className="font-bold text-indigo-400 text-base">
+                  ฿{Number(selectedPlanSummary.eventBudget).toLocaleString()} บาท
+                </span>
+              </div>
+
+              {(() => {
+                const bTotal = Number(selectedPlanSummary.eventBudget) || 0;
+                const foodAmt = Math.round((bTotal * (selectedPlanSummary.foodPct || 30)) / 100);
+                const snackAmt = selectedPlanSummary.hasSnack ? Math.round((bTotal * (selectedPlanSummary.snackPct || 10)) / 100) : 0;
+                const venueAmt = Math.round((bTotal * (selectedPlanSummary.venuePct || 30)) / 100);
+                const decorAmt = Math.round((bTotal * (selectedPlanSummary.decorPct || 15)) / 100);
+                const techAmt = Math.round((bTotal * (selectedPlanSummary.techPct || 15)) / 100);
+                const guests = selectedPlanSummary.totalGuests || 1;
+
+                return (
+                  <div className="space-y-2 text-slate-300">
+                    <div className="flex justify-between items-center">
+                      <span>• อาหารหลัก ({selectedPlanSummary.foodPct}%):</span>
+                      <div className="text-right">
+                        <span className="font-bold text-white">฿{foodAmt.toLocaleString()} บาท</span>
+                        <span className="text-[10px] text-slate-400 block">(~฿{Math.round(foodAmt/guests).toLocaleString()} / คน)</span>
+                      </div>
+                    </div>
+                    {selectedPlanSummary.hasSnack && (
+                      <div className="flex justify-between items-center">
+                        <span>• อาหารว่าง / Coffee Break ({selectedPlanSummary.snackPct}%):</span>
+                        <div className="text-right">
+                          <span className="font-bold text-amber-300">฿{snackAmt.toLocaleString()} บาท</span>
+                          <span className="text-[10px] text-slate-400 block">(~฿{Math.round(snackAmt/guests).toLocaleString()} / คน)</span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center">
+                      <span>• สถานที่ & อุปกรณ์ ({selectedPlanSummary.venuePct}%):</span>
+                      <span className="font-bold text-purple-300">฿{venueAmt.toLocaleString()} บาท</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span>• การตกแต่ง & ดอกไม้ ({selectedPlanSummary.decorPct}%):</span>
+                      <span className="font-bold text-pink-300">฿{decorAmt.toLocaleString()} บาท</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span>• ช่างภาพ & ระบบแสงเสียง ({selectedPlanSummary.techPct}%):</span>
+                      <span className="font-bold text-emerald-300">฿{techAmt.toLocaleString()} บาท</span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* รายละเอียดอาหารและเงื่อนไข */}
+            <div className="bg-indigo-950/30 border border-indigo-500/20 rounded-2xl p-4 text-xs space-y-2 text-slate-300 print-box">
+              <h4 className="font-bold text-indigo-300 text-sm flex items-center gap-1.5">
+                <i className="fa-solid fa-utensils no-print"></i> รายละเอียดอาหาร & การบริการ
+              </h4>
+              <p><strong className="text-white">รูปแบบอาหาร:</strong> {selectedPlanSummary.foodStyle}</p>
+              <p><strong className="text-white">ข้อกำหนดอาหาร:</strong> {selectedPlanSummary.dietaryReq}</p>
+              <p><strong className="text-white">เวลาจัดงาน:</strong> {selectedPlanSummary.startTime} - {selectedPlanSummary.endTime} น.</p>
+              {selectedPlanSummary.hasSnack && (
+                <p className="text-slate-400 text-[11px] pt-1">
+                  * รวมบริการเบรกอาหารว่าง 2 รอบ (รอบเช้า 10:30 น. และ รอบบ่าย 14:30 น.)
+                </p>
+              )}
+            </div>
+
+            {/* ปุ่มการทำงาน (ซ่อนเมื่อพิมพ์) */}
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-slate-800 no-print">
+              <button
+                onClick={() => window.print()}
+                className="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <i className="fa-solid fa-print"></i> <span>พิมพ์ / พิมพ์เป็น PDF</span>
+              </button>
+              <button
+                onClick={() => loadPlanFromHistory(selectedPlanSummary)}
+                className="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md"
+              >
+                <i className="fa-solid fa-wand-magic-sparkles"></i> <span>ดึงข้อมูลแผนงานนี้เข้า Planner</span>
+              </button>
+              <button
+                onClick={() => setSelectedPlanSummary(null)}
+                className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition cursor-pointer"
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: Auth Modal */}
       {authModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-sm p-4 no-print">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-md relative shadow-2xl">
             <button onClick={() => setAuthModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"><i className="fa-solid fa-xmark text-lg"></i></button>
 
@@ -1192,11 +1432,7 @@ export default function Home() {
               <form onSubmit={handleSignup} className="space-y-4">
                 <input type="text" required placeholder="ชื่อ - นามสกุล" value={signupName} onChange={(e) => setSignupName(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white" />
                 <input type="email" required placeholder="อีเมล" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white" />
-                
-                {/* รหัสผ่านรอบที่ 1 */}
                 <input type="password" required placeholder="ตั้งรหัสผ่าน" value={signupPass} onChange={(e) => setSignupPass(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white" />
-                
-                {/* รหัสผ่านรอบที่ 2 (ยืนยันรหัสผ่าน) */}
                 <input type="password" required placeholder="ยืนยันรหัสผ่านอีกครั้ง" value={confirmSignupPass} onChange={(e) => setConfirmSignupPass(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white" />
                 
                 <p className="text-[10px] text-indigo-300">รหัสผ่านต้องมีตัวอักษร, ตัวเลข และอักขระพิเศษอย่างน้อย 6 ตัวอักษร</p>
@@ -1206,6 +1442,11 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <footer className="py-6 border-t border-slate-800 text-center text-xs text-slate-500 no-print">
+        © EventCraft Phuket Studio. All rights reserved.
+      </footer>
     </>
   );
 }

@@ -23,3 +23,98 @@ body {
   border-color: #818cf8 !important;
   background-color: #6366f1 !important;
 }
+@import "tailwindcss";
+
+@layer utilities {
+  .active-tab {
+    background-color: #4f46e5 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  }
+}
+
+body {
+  font-family: 'Kanit', sans-serif;
+}
+
+/* Custom CSS สำหรับ Radio Card */
+.food-radio-card input:checked + div {
+  border-color: #6366f1 !important;
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.food-radio-card input:checked + div .radio-circle {
+  border-color: #818cf8 !important;
+  background-color: #6366f1 !important;
+}
+
+/* =========================================================
+   CSS สำหรับการพิมพ์ (PRINT STYLES: A4 หน้าเดียว ตัวหนังสือเข้มอ่านง่าย)
+   ========================================================= */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  /* 1. ซ่อนทุกองค์ประกอบบนหน้าเว็บทั้งหมดก่อน */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 2. บังคับแสดงเฉพาะพื้นที่สรุปแผนงาน (#print-summary-area) และเนื้อหาข้างใน */
+  #print-summary-area,
+  #print-summary-area * {
+    visibility: visible !important;
+  }
+
+  /* 3. ดึงพื้นที่พิมพ์มาวางตำแหน่งมุมซ้ายบนสุดของกระดาษ A4 */
+  #print-summary-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* 4. ปรับตัวหนังสือทั้งหมดให้เป็นสีเข้ม (Dark Slate) อ่านง่าย 100% */
+  #print-summary-area * {
+    color: #0f172a !important;
+    text-shadow: none !important;
+  }
+
+  /* 5. ปรับเปลี่ยนกล่องข้อมูลให้เป็นการ์ดสีขาว/เทาอ่อน พร้อมขอบสีเข้ม */
+  #print-summary-area .print-card-box {
+    background-color: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+  }
+
+  #print-summary-area .print-highlight {
+    color: #4338ca !important; /* สีเน้นข้อความ */
+    font-weight: bold !important;
+  }
+
+  /* 6. จำกัดความสูงรูปภาพ AI เพื่อไม่ให้ดันเนื้อหาตกไปหน้า 2 */
+  #print-summary-area img {
+    max-height: 140px !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    border-radius: 10px !important;
+  }
+
+  /* 7. ซ่อนปุ่มกดทั้งหมดเมื่อสั่งพิมพ์ */
+  .no-print,
+  .no-print * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
