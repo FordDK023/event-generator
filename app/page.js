@@ -507,7 +507,7 @@ export default function Home() {
   return (
     <>
       {/* Header Nav */}
-      <nav className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 no-print">
+      <nav className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setPage('showcase')}>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-400 flex items-center justify-center text-white font-bold text-xl shadow-lg">
@@ -552,7 +552,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <main className="flex-grow no-print">
+      <main className="flex-grow">
         {/* PAGE 1: SHOWCASE */}
         {page === 'showcase' && (
           <div>
@@ -656,7 +656,7 @@ export default function Home() {
               <div>
                 <span className="text-xs font-semibold tracking-widest text-indigo-400 uppercase">Phuket Selected Venues</span>
                 <h2 className="text-3xl font-bold text-white mt-1">15 สถานที่จัดงานยอดนิยมในภูเก็ต</h2>
-                <p className="text-slate-400 text-xs mt-1">ข้อมูลโรงแรม ความจุ ที่จอดรถ ลิงก์เว็บไซต์ และแผนที่ Google Maps</p>
+                <p className="text-slate-400 text-xs mt-1">ข้อมูลโรงแรม ความจุ ที่จอดรถ ลลิงก์เว็บไซต์ และแผนที่ Google Maps</p>
               </div>
               <div className="relative">
                 <input type="text" value={venueSearch} onChange={(e) => setVenueSearch(e.target.value)} placeholder="ค้นหาชื่อสถานที่..." className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-indigo-500 w-full sm:w-64" />
@@ -1051,7 +1051,7 @@ export default function Home() {
 
       {/* MODAL 1: Gallery Theme Detail Modal */}
       {galleryModalTheme && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 no-print" onClick={() => setGalleryModalTheme(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4" onClick={() => setGalleryModalTheme(null)}>
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-2xl relative shadow-2xl space-y-5 text-slate-100 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setGalleryModalTheme(null)} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer">
               <i className="fa-solid fa-xmark text-lg"></i>
@@ -1143,7 +1143,7 @@ export default function Home() {
 
       {/* MODAL 2: Guide Modal */}
       {guideModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 no-print">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-2xl relative shadow-2xl space-y-6 text-slate-100 max-h-[90vh] overflow-y-auto">
             <button onClick={() => setGuideModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"><i className="fa-solid fa-xmark text-lg"></i></button>
 
@@ -1210,7 +1210,7 @@ export default function Home() {
 
       {/* MODAL 3: Profile & Saved Plans List Modal */}
       {profileModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 no-print">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-xl relative shadow-2xl space-y-6 text-slate-100 max-h-[85vh] overflow-y-auto">
             <button onClick={() => setProfileModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"><i className="fa-solid fa-xmark text-lg"></i></button>
             <div className="flex items-center gap-4 border-b border-slate-800 pb-4">
@@ -1266,21 +1266,24 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL 4: Full Event Brief / Plan Summary Modal (ปรับปรุงให้พิมพ์ 1 หน้า A4 คมชัด) */}
+      {/* MODAL 4: Full Event Brief / Plan Summary Modal (ป็อปอัปดูสรุปฉบับเต็มบนเว็บ) */}
       {selectedPlanSummary && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 print-modal-overlay" onClick={() => setSelectedPlanSummary(null)}>
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-2xl relative shadow-2xl space-y-5 text-slate-100 max-h-[92vh] overflow-y-auto print-card-content" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setSelectedPlanSummary(null)} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer no-print">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4" onClick={() => setSelectedPlanSummary(null)}>
+          <div 
+            className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-2xl relative shadow-2xl space-y-4 text-slate-100 max-h-[92vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button onClick={() => setSelectedPlanSummary(null)} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer">
               <i className="fa-solid fa-xmark text-lg"></i>
             </button>
 
             {/* Header สรุปงาน */}
-            <div className="border-b border-slate-800 pb-4">
+            <div className="border-b border-slate-800 pb-3">
               <span className="text-[10px] font-bold text-indigo-400 tracking-widest uppercase bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">
                 EVENT BRIEF SUMMARY
               </span>
-              <h2 className="text-2xl font-bold text-white mt-2">{selectedPlanSummary.eventName}</h2>
-              <p className="text-xs text-slate-400 mt-1">
+              <h2 className="text-2xl font-bold text-white mt-1.5">{selectedPlanSummary.eventName}</h2>
+              <p className="text-xs text-slate-400 mt-0.5">
                 บันทึกเมื่อ: {selectedPlanSummary.savedAt} • ประเภทงาน: <strong className="text-indigo-300">{selectedPlanSummary.eventType}</strong>
               </p>
             </div>
@@ -1289,37 +1292,37 @@ export default function Home() {
             {selectedPlanSummary.aiPreviewUrl && (
               <div className="relative h-44 sm:h-52 w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">
                 <img src={selectedPlanSummary.aiPreviewUrl} alt="AI Preview Summary" className="w-full h-full object-cover" />
-                <div className="absolute bottom-2 left-2 bg-black/75 px-3 py-1 rounded-lg text-[11px] text-slate-200 backdrop-blur-sm no-print">
+                <div className="absolute bottom-2 left-2 bg-black/75 px-3 py-1 rounded-lg text-[11px] text-slate-200 backdrop-blur-sm">
                   {selectedPlanSummary.aiCaption || "ภาพจำลองบรรยากาศงาน"}
                 </div>
               </div>
             )}
 
             {/* ข้อมูลทั่วไปของงาน */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 print-box">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+              <div className="bg-slate-800/50 p-2.5 rounded-xl border border-slate-800">
                 <span className="text-slate-400 block text-[10px]">ผู้ใหญ่</span>
                 <span className="font-bold text-white text-sm">{selectedPlanSummary.adultCount} คน</span>
               </div>
-              <div className="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 print-box">
+              <div className="bg-slate-800/50 p-2.5 rounded-xl border border-slate-800">
                 <span className="text-slate-400 block text-[10px]">เด็ก</span>
                 <span className="font-bold text-white text-sm">{selectedPlanSummary.kidCount} คน</span>
               </div>
-              <div className="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 print-box">
+              <div className="bg-slate-800/50 p-2.5 rounded-xl border border-slate-800">
                 <span className="text-slate-400 block text-[10px]">ผู้ร่วมงานรวม</span>
                 <span className="font-bold text-indigo-300 text-sm">{selectedPlanSummary.totalGuests} คน</span>
               </div>
-              <div className="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 print-box">
+              <div className="bg-slate-800/50 p-2.5 rounded-xl border border-slate-800">
                 <span className="text-slate-400 block text-[10px]">วันที่จัดงาน</span>
                 <span className="font-bold text-white text-xs">{selectedPlanSummary.eventDate || 'ไม่ระบุ'}</span>
               </div>
             </div>
 
             {/* ตารางจัดสรรงบประมาณ */}
-            <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-3 text-xs print-box">
+            <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 space-y-2.5 text-xs">
               <div className="flex justify-between items-center border-b border-slate-700/80 pb-2">
                 <h4 className="font-bold text-white flex items-center gap-1.5 text-sm">
-                  <i className="fa-solid fa-coins text-amber-400 no-print"></i> ตารางสรุปงบประมาณจัดสรร
+                  <i className="fa-solid fa-coins text-amber-400"></i> ตารางสรุปงบประมาณจัดสรร
                 </h4>
                 <span className="font-bold text-indigo-400 text-base">
                   ฿{Number(selectedPlanSummary.eventBudget).toLocaleString()} บาท
@@ -1336,33 +1339,33 @@ export default function Home() {
                 const guests = selectedPlanSummary.totalGuests || 1;
 
                 return (
-                  <div className="space-y-2 text-slate-300">
+                  <div className="space-y-1.5 text-slate-300 text-xs">
                     <div className="flex justify-between items-center">
-                      <span>• อาหารหลัก ({selectedPlanSummary.foodPct}%):</span>
+                      <span>• ค่าอาหารหลัก ({selectedPlanSummary.foodPct}%):</span>
                       <div className="text-right">
                         <span className="font-bold text-white">฿{foodAmt.toLocaleString()} บาท</span>
-                        <span className="text-[10px] text-slate-400 block">(~฿{Math.round(foodAmt/guests).toLocaleString()} / คน)</span>
+                        <span className="text-[10px] text-slate-400 ml-1">(~฿{Math.round(foodAmt/guests).toLocaleString()}/คน)</span>
                       </div>
                     </div>
                     {selectedPlanSummary.hasSnack && (
                       <div className="flex justify-between items-center">
-                        <span>• อาหารว่าง / Coffee Break ({selectedPlanSummary.snackPct}%):</span>
+                        <span>• ค่าอาหารว่าง / Coffee Break ({selectedPlanSummary.snackPct}%):</span>
                         <div className="text-right">
                           <span className="font-bold text-amber-300">฿{snackAmt.toLocaleString()} บาท</span>
-                          <span className="text-[10px] text-slate-400 block">(~฿{Math.round(snackAmt/guests).toLocaleString()} / คน)</span>
+                          <span className="text-[10px] text-slate-400 ml-1">(~฿{Math.round(snackAmt/guests).toLocaleString()}/คน)</span>
                         </div>
                       </div>
                     )}
                     <div className="flex justify-between items-center">
-                      <span>• สถานที่ & อุปกรณ์ ({selectedPlanSummary.venuePct}%):</span>
+                      <span>• ค่าสถานที่ & อุปกรณ์ ({selectedPlanSummary.venuePct}%):</span>
                       <span className="font-bold text-purple-300">฿{venueAmt.toLocaleString()} บาท</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span>• การตกแต่ง & ดอกไม้ ({selectedPlanSummary.decorPct}%):</span>
+                      <span>• ค่าการตกแต่ง & ดอกไม้ ({selectedPlanSummary.decorPct}%):</span>
                       <span className="font-bold text-pink-300">฿{decorAmt.toLocaleString()} บาท</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span>• ช่างภาพ & ระบบแสงเสียง ({selectedPlanSummary.techPct}%):</span>
+                      <span>• ค่าช่างภาพ & ระบบแสงเสียง ({selectedPlanSummary.techPct}%):</span>
                       <span className="font-bold text-emerald-300">฿{techAmt.toLocaleString()} บาท</span>
                     </div>
                   </div>
@@ -1371,28 +1374,22 @@ export default function Home() {
             </div>
 
             {/* รายละเอียดอาหารและเงื่อนไข */}
-            <div className="bg-indigo-950/30 border border-indigo-500/20 rounded-2xl p-4 text-xs space-y-2 text-slate-300 print-box">
+            <div className="bg-indigo-950/30 border border-indigo-500/20 rounded-2xl p-4 text-xs space-y-1.5 text-slate-300">
               <h4 className="font-bold text-indigo-300 text-sm flex items-center gap-1.5">
-                <i className="fa-solid fa-utensils no-print"></i> รายละเอียดอาหาร & การบริการ
+                <i className="fa-solid fa-utensils"></i> รายละเอียดอาหาร & การบริการ
               </h4>
               <p><strong className="text-white">รูปแบบอาหาร:</strong> {selectedPlanSummary.foodStyle}</p>
               <p><strong className="text-white">ข้อกำหนดอาหาร:</strong> {selectedPlanSummary.dietaryReq}</p>
               <p><strong className="text-white">เวลาจัดงาน:</strong> {selectedPlanSummary.startTime} - {selectedPlanSummary.endTime} น.</p>
               {selectedPlanSummary.hasSnack && (
-                <p className="text-slate-400 text-[11px] pt-1">
+                <p className="text-slate-400 text-[11px] pt-0.5">
                   * รวมบริการเบรกอาหารว่าง 2 รอบ (รอบเช้า 10:30 น. และ รอบบ่าย 14:30 น.)
                 </p>
               )}
             </div>
 
-            {/* ปุ่มการทำงาน (ซ่อนเมื่อพิมพ์) */}
-            <div className="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-slate-800 no-print">
-              <button
-                onClick={() => window.print()}
-                className="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <i className="fa-solid fa-print"></i> <span>พิมพ์ / พิมพ์เป็น PDF</span>
-              </button>
+            {/* ปุ่มการทำงาน */}
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-slate-800">
               <button
                 onClick={() => loadPlanFromHistory(selectedPlanSummary)}
                 className="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md"
@@ -1401,7 +1398,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setSelectedPlanSummary(null)}
-                className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition cursor-pointer"
+                className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition cursor-pointer"
               >
                 ปิด
               </button>
@@ -1412,7 +1409,7 @@ export default function Home() {
 
       {/* MODAL 5: Auth Modal */}
       {authModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-sm p-4 no-print">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-sm p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-md relative shadow-2xl">
             <button onClick={() => setAuthModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"><i className="fa-solid fa-xmark text-lg"></i></button>
 
@@ -1444,7 +1441,7 @@ export default function Home() {
       )}
 
       {/* Footer */}
-      <footer className="py-6 border-t border-slate-800 text-center text-xs text-slate-500 no-print">
+      <footer className="py-6 border-t border-slate-800 text-center text-xs text-slate-500">
         © EventCraft Phuket Studio. All rights reserved.
       </footer>
     </>
